@@ -10,4 +10,5 @@ description: Lucy Kim's research projects
 I am a postdoc at the [Center for Healthcare Innovation and Delivery Science in the Department of Population Health](https://med.nyu.edu/chids/home) at NYU School of Medicine. I will get a PhD in [Health Care Management and Economics](https://hcmg.wharton.upenn.edu/) at the Wharton School of the University of Pennsylvania. Prior to entering the doctoral program, I was a research fellow at Stanford Law School working on health policy research.
 
 &nbsp;&nbsp;&nbsp;&nbsp;- [CV](https://www.dropbox.com/s/zk7ezft9euff3pp/Kim-cv.pdf?dl=0) 
+
 &nbsp;&nbsp;&nbsp;&nbsp;- [Research](pages/research.html) 

@@ -5,7 +5,7 @@ description: Description of research projects with codes
 ---
 
 - **The effect of workforce assignment on performance: Evidence from home health care** (2018), joint with [Guy David](https://hcmg.wharton.upenn.edu/profile/gdavid2/). [_Journal of Health Economics_](https://doi.org/10.1016/j.jhealeco.2018.03.003)
-  - [Draft](https://www.dropbox.com/s/4t5eklv1sjt3uj5/handoffs-readmit-RR-finaldraft%202.23.18.pdf?dl=0), [GitHub](https://github.com/lucy-kim/handoffs-readmit)
+  - [Draft](https://www.dropbox.com/s/f8vgj3rpvqquif8/handoffs-readmit-published-draft.pdf?dl=0), [GitHub](https://github.com/lucy-kim/handoffs-readmit)
 
 - **Referrals to skilled nursing facilities under the Hospital Readmission Reduction Program** (2018), joint with Li Li, [Meng Kuang](https://medicine.yale.edu/core/people/meng_kuang.profile), [Leora I. Horwitz](https://nyulangone.org/doctors/1841334810/leora-horwitz), [Sunita Desai](https://med.nyu.edu/faculty/sunita-m-desai). Pending submission. 
   - [Draft](https://www.dropbox.com/s/0cdh3i1l3o75u8c/hrrp-snf-medical-7.2.18.pdf?dl=0), [GitHub](https://github.com/lucy-kim/vertical-integration)

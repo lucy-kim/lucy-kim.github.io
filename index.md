@@ -1,8 +1,8 @@
 ---
 layout: page
 title: Kunhee Lucy Kim
-tagline: Research on health care delivery and beyond
-description: Kunhee Lucy Kim's research projects
+tagline: Research projects using business and medical data
+description: Kunhee Lucy Kim's personal website
 ---
 
 <img style="float: left; padding-right: 30px;" src="http://lucy-kim.github.io/profile_mar2016.jpg">

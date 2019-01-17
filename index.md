@@ -13,4 +13,4 @@ I completed a postdoctoral research fellowship at the Center for Healthcare Inno
 
 &nbsp;&nbsp;&nbsp;&nbsp;- [CV](https://www.dropbox.com/s/bqutffj5wu0whj8/KunheeLucyKim-cv.pdf?dl=0)
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- [Research](pages/research.html)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- [Research](pages/research.html)

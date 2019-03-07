@@ -2,7 +2,7 @@
 layout: page
 title: Kunhee Lucy Kim
 tagline: Translating the real-world data from business and medicine into insights
-description: Kunhee Lucy Kim's personal website
+description: Lucy Kim's personal website
 ---
 
 <img style="float: left; padding-right: 30px;" src="http://lucy-kim.github.io/profile_mar2016.jpg">
@@ -13,3 +13,5 @@ I completed a postdoctoral research fellowship at the Center for Healthcare Inno
 &nbsp;&nbsp;&nbsp;&nbsp;- [CV](https://www.dropbox.com/s/bqutffj5wu0whj8/KunheeLucyKim-cv.pdf?dl=0)
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- [Research](pages/research.html)
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- [Research](pages/learn-mySQL.html)

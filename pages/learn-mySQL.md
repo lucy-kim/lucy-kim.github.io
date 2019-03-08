@@ -100,7 +100,7 @@ inner join dept d
 on e.deptno=d.deptno
 where e.deptno=10;
 ```
-3. **Find it hard!!** Select values in a column that don't exist in the other table (including null values)
+3. **(Hard!!)** Select values in a column that don't exist in the other table (including null values)
 ```sql
 select d.deptno
   from dept d
@@ -260,7 +260,7 @@ where deptno=20
 group by sal
 having count(*) >= all (select count(*) from emp where deptno=20 group by sal);
 ```
-8. (Hard!!) Finding a **median** is also tricky: do a self-join
+8. **(Hard!!)** Finding a **median** is also tricky: do a self-join
 ```sql
 		select a.sal
 		from emp a, emp b
@@ -334,7 +334,8 @@ select deptno, job,
 		   count(*) over(partition by deptno, job) as nemp_job_dept,
 			 count(*) over() as tot_employees
 from emp;
-
+```
+```sql
 select deptno,
 			 emp_cnt as dept_total,
 			 total,

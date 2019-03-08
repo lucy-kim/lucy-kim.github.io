@@ -2,9 +2,6 @@
 layout: page
 title: MySQL tutorial using SQL Cookbook
 description: This tutorial offers key essential lessons on how to use MySQL taught in SQL Cookbook (O'Reilly), along with instructions on how to set up MySQL on personal computer (Mac) and the example data for practice.
-output:
-  html_document:
-    highlight: pygments
 ---
 
 This tutorial offers key essential lessons on how to use MySQL taught in [SQL Cookbook (O'Reilly)](http://shop.oreilly.com/product/9780596009762.do), along with instructions on how to set up MySQL on personal computer (Mac) and the example data for practice.
@@ -75,14 +72,14 @@ From the perspective of someone with economics research background
 
 ### Sorting query results
 1. `order by col1, col2 desc`: sort by col1 in ascending, by col2 in descending order
-2. sort by the **last** two characters of job title: use `substr()`
+2. Sort by the **last** two characters of job title: use `substr()`
 ```sql
 select ename, job
 from emp
 order by substr(job,length(job)-1);
 % this substring = all characters from the first to the last char
 ```
-2. sort by `comm` if job is salesman, and by `sal` for all other jobs -> use `case` expression in the `order by`
+2. Sort by `comm` if job is salesman, and by `sal` for all other jobs -> use `case` expression in the `order by`
 ```sql
 select ename, sal, job, comm
 from emp
@@ -104,137 +101,167 @@ on e.deptno=d.deptno
 where e.deptno=10;
 ```
 3. **Find it hard!!** Select values in a column that don't exist in the other table (including null values)
-		select d.deptno
-		  from dept d
-		 where not exists (
-		   select 1
-		     from new_dept nd
-		    where d.deptno = nd.deptno);
+```sql
+select d.deptno
+  from dept d
+ where not exists (
+   select 1
+     from new_dept nd
+    where d.deptno = nd.deptno);
+```
 4. Select rows that don't exist in another table
-		select d.*
-		from dept d
-		left (outer) join emp e
-		on (d.deptno=e.deptno)
-		where e.deptno is null;
+```sql
+select d.*
+from dept d
+left (outer) join emp e
+on (d.deptno=e.deptno)
+where e.deptno is null;
+```
 5. Add new information in the left table by merging with other table
-		select e.ename, d.loc, eb.received
-		from emp e join dept d
-			on (e.deptno=d.deptno)
-		left join emp_bonus eb
-			on (e.empno=eb.empno)
-		order by 2;
+```sql
+select e.ename, d.loc, eb.received
+from emp e join dept d
+	on (e.deptno=d.deptno)
+left join emp_bonus eb
+	on (e.empno=eb.empno)
+order by 2;
+```
 or
-		select e.ename, d.loc,
-			(select eb.received from emp_bonus eb
-			 where eb.empno=e.empno) as received
-		from emp e, dept d
-		where e.deptno=d.deptno
-		order by 2;
+```sql
+select e.ename, d.loc,
+	(select eb.received from emp_bonus eb
+	 where eb.empno=e.empno) as received
+from emp e, dept d
+where e.deptno=d.deptno
+order by 2;
+```
 6. Performing joins when using aggregates: e.g. sum salary and bonus for deptno=10 when bonus data contain bonuses for all employees in deptno=10
 
 	1) Merge first and then sum (with distinct inside sum function)
-		select deptno, sum(distinct sal) as tot_salary, sum(bonus) as tot_bonus
-		from (
-			select e.empno, e.ename, e.deptno, e.sal,
-				e.sal*case
-						when eb.type=1 then 0.1
-						when eb.type=2 then 0.2
-						else 0.3
-					end as bonus
-			from emp e, emp_bonus eb
-			where e.empno=eb.empno
-			and e.deptno=10
-		) x
-		group by deptno, tot_salary;
+```sql
+select deptno, sum(distinct sal) as tot_salary, sum(bonus) as tot_bonus
+from (
+	select e.empno, e.ename, e.deptno, e.sal,
+		e.sal*case
+				when eb.type=1 then 0.1
+				when eb.type=2 then 0.2
+				else 0.3
+			end as bonus
+	from emp e, emp_bonus eb
+	where e.empno=eb.empno
+	and e.deptno=10
+) x
+group by deptno, tot_salary;
+```
 or 2) Sum employee salary first and merge
-
-		select d.deptno, d.tot_salary,
-			sum(e.sal*case when eb.type=1 then 0.1
-									when eb.type=2 then 0.2
-									else 0.3 end) as tot_bonus
-		from emp e,
-			 emp_bonus eb,
-			 (select deptno, sum(sal) as tot_salary
-				  from emp
-					where deptno=10
-					group by deptno) d
-		where e.empno=eb.empno and
-					e.deptno=d.deptno
-		group by deptno, tot_salary;
+```sql
+select d.deptno, d.tot_salary,
+	sum(e.sal*case when eb.type=1 then 0.1
+							when eb.type=2 then 0.2
+							else 0.3 end) as tot_bonus
+from emp e,
+	 emp_bonus eb,
+	 (select deptno, sum(sal) as tot_salary
+		  from emp
+			where deptno=10
+			group by deptno) d
+where e.empno=eb.empno and
+			e.deptno=d.deptno
+group by deptno, tot_salary;
+```
 7. Performing outer joins when using aggregates: sum salary and bonus for deptno=10 when bonus data don't contain bonuses for all employees in deptno=10
-		select deptno, sum(distinct sal) as tot_salary, sum(bonus) as tot_bonus
-		from (select e.deptno, e.ename, e.sal,
-							e.sal*case when eb.type is null then 0
-												 else eb.type/10
-										end as bonus
-			  from emp e
-			  left outer join emp_bonus eb
-				on (e.empno=eb.empno)
-				where deptno=10) x
-		group by deptno, tot_salary;
+```sql
+select deptno, sum(distinct sal) as tot_salary, sum(bonus) as tot_bonus
+from (select e.deptno, e.ename, e.sal,
+					e.sal*case when eb.type is null then 0
+										 else eb.type/10
+								end as bonus
+	  from emp e
+	  left outer join emp_bonus eb
+		on (e.empno=eb.empno)
+		where deptno=10) x
+group by deptno, tot_salary;
+```
 or same as the 2nd solution in \#6:
-		select d.deptno, d.tot_salary,
-			sum(e.sal*eb.type/10) as tot_bonus
-		from emp e,
-				 emp_bonus eb,
-				 (select deptno, sum(sal) as tot_salary from emp where deptno=10 group by deptno) d
-				 where e.empno=eb.empno and
-				 	 e.deptno=d.deptno
-				group by deptno, tot_salary;
+```sql
+select d.deptno, d.tot_salary,
+	sum(e.sal*eb.type/10) as tot_bonus
+from emp e,
+		 emp_bonus eb,
+		 (select deptno, sum(sal) as tot_salary from emp where deptno=10 group by deptno) d
+		 where e.empno=eb.empno and
+		 	 e.deptno=d.deptno
+		group by deptno, tot_salary;
+```
 8. Returning missing data from both merging tables -> `union` the results of 2 different outer joins (can't be done soley by `left join` or `right join` one at a time)
-		select d.deptno, d.dname, e.ename
-		from dept d
-		left join emp e
-		on (d.deptno=e.deptno)
-		union
-		select d.deptno, d.dname, e.ename
-		from dept d
-		right join emp e
-		on (d.deptno=e.deptno);
+```sql
+select d.deptno, d.dname, e.ename
+from dept d
+left join emp e
+on (d.deptno=e.deptno)
+union
+select d.deptno, d.dname, e.ename
+from dept d
+right join emp e
+on (d.deptno=e.deptno);
+```
 9. Operation/comparison when a column contains null: e.g. find all employees whose commission is less than the commision of employee "WARD", including those with a null commission
- 			select ename, comm
-			from emp
-			where coalesce(comm,0) < (select coalesce(comm,0) from emp where ename='WARD');
+```sql
+select ename, comm
+from emp
+where coalesce(comm,0) < (select coalesce(comm,0) from emp where ename='WARD');
+```
 
 ### Working with numbers
 1. `avg(col)` to compute average; can be combined with `group by`
 2. `max(col)`, `min(col)`, `sum(col)`
 3. `count(*)` counts number of rows *vs* `count(col)` number of non-NULL values
 4. Running total without using window function but with scalar subquery
-		select e.ename, e.sal,
-			(select sum(d.sal) from emp d
-				where d.empno <= e.empno) as run_total
-		from emp e
-		order by 3;
+```sql
+select e.ename, e.sal,
+	(select sum(d.sal) from emp d
+		where d.empno <= e.empno) as run_total
+from emp e
+order by 3;
+```
 Note this can be done more concisely using `sum() over()`:
-		select ename, sal,
-			sum(sal) over(order by sal)
-		from emp;
+```sql
+select ename, sal,
+	sum(sal) over(order by sal)
+from emp;
+```
 5. Running product - take sum of logs `ln(sal)` and exponentiate
 Note: this doesn't work if `sal` <=0 since you can't take log of non-positive values
-		select ename, sal, round(exp(log),0)
-		from (
-		select ename, sal,
-			sum(ln(sal)) over(order by sal) as log
-		from emp
-		) x;
+```sql
+select ename, sal, round(exp(log),0)
+from (
+select ename, sal,
+	sum(ln(sal)) over(order by sal) as log
+from emp
+) x;
+```
 or
-		select e.ename, e.sal,
-			(select round(exp(sum(ln(d.sal))),0) from emp d
-				where d.empno <= e.empno and
-					d.deptno=e.deptno) as run_product
-		from emp e
-		where e.deptno=10;
+```sql
+select e.ename, e.sal,
+	(select round(exp(sum(ln(d.sal))),0) from emp d
+		where d.empno <= e.empno and
+			d.deptno=e.deptno) as run_product
+from emp e
+where e.deptno=10;
+```
 6. Running difference: only the first value in the group is conserved, multiply the rest by (-1) and sum them up
 	- **Warning**: the MySQL solution on running difference on p.172 of the book is wrong.
 	- **Don't know how to do this**
 7. Finding a **mode** is a little tricky, involving `having count(*) >= all (count by value)`
-		select sal
-		from emp
-		where deptno=20
-		group by sal
-		having count(*) >= all (select count(*) from emp where deptno=20 group by sal);
-8. Finding a **median** is also tricky: do a self-join
+```sql
+select sal
+from emp
+where deptno=20
+group by sal
+having count(*) >= all (select count(*) from emp where deptno=20 group by sal);
+```
+8. (Hard!!) Finding a **median** is also tricky: do a self-join
+```sql
 		select a.sal
 		from emp a, emp b
 		where a.deptno=b.deptno
@@ -262,61 +289,66 @@ or
 				 where e.deptno = d.deptno
 				       and e.deptno = 20
 				     group by e.sal;
-
-				 SQL Cookbook (Cookbooks (O'Reilly)) (p. 179). O'Reilly Media. Kindle Edition.
-		SQL Cookbook (Cookbooks (O'Reilly)) (p. 179). O'Reilly Media. Kindle Edition.
-
+```
 ### Window function refresher
 1. Number of employees in the department and job, respectively, for each employee's department/job
-		select ename, deptno, job,
-			count(*) over(partition by deptno) as dept_cnt,
-			count(*) over(partition by job) as job_cnt
-		from emp
-		order by 2;
+```sql
+select ename, deptno, job,
+	count(*) over(partition by deptno) as dept_cnt,
+	count(*) over(partition by job) as job_cnt
+from emp
+order by 2;
+```
 2. Running total of salaries for employees in deptno=10
-		select deptno, ename, hiredate, sal,
-			sum(sal) over(partition by deptno) as total1,
-			sum(sal) over() as total2,
-			sum(sal) over(order by hiredate) as running_total
-		from emp
-		where deptno=10;
+```sql
+select deptno, ename, hiredate, sal,
+	sum(sal) over(partition by deptno) as total1,
+	sum(sal) over() as total2,
+	sum(sal) over(order by hiredate) as running_total
+from emp
+where deptno=10;
+```
 	You can use framing clauses like `range between unbounded preceding and current row` (default if unspecified), `rows between 1 preceding and 1 following`
-		select deptno, ename, hiredate, sal,
-			sum(sal) over(partition by deptno) as total1,
-			sum(sal) over() as total2,
-			sum(sal) over(order by hiredate
-									  range between unbounded preceding and current row) as running_total1,
-			sum(sal) ove2(order by hiredate
-										rows between 1 preceding and current row) as running_total2,
-			sum(sal) over(order by hiredate
-									  range between current row and unbounded following) as running_total3,
-			sum(sal) over(order by hiredate
-										rows between 1 preceding and
-										1 following) as running_total4
-		from emp
-		where deptno=10;
+```sql
+select deptno, ename, hiredate, sal,
+	sum(sal) over(partition by deptno) as total1,
+	sum(sal) over() as total2,
+	sum(sal) over(order by hiredate
+							  range between unbounded preceding and current row) as running_total1,
+	sum(sal) ove2(order by hiredate
+								rows between 1 preceding and current row) as running_total2,
+	sum(sal) over(order by hiredate
+							  range between current row and unbounded following) as running_total3,
+	sum(sal) over(order by hiredate
+								rows between 1 preceding and
+								1 following) as running_total4
+from emp
+where deptno=10;
+```
 	Note: The framing clauses didn't work on MySQL version 8.0.15.
 3. `max`/`min` over
 4. To answer: "What is the number of employees in each dept, how many different types of employees in each dept, how many total employees in table?"
-		select deptno, job,
-					 count(*) over(partition by deptno) as nemp_dept,
-				   count(*) over(partition by deptno, job) as nemp_job_dept,
-					 count(*) over() as tot_employees
-		from emp;
+```sql
+select deptno, job,
+			 count(*) over(partition by deptno) as nemp_dept,
+		   count(*) over(partition by deptno, job) as nemp_job_dept,
+			 count(*) over() as tot_employees
+from emp;
 
-		select deptno,
-					 emp_cnt as dept_total,
-					 total,
-					 max(case when job='CLERK' then job_cnt else 0) as clerks,
-					 max(case when job='MANAGER' then job_cnt else 0) as managers,
-					 max(case when job='PRESIDENT' then job_cnt else 0) as prez,
-					 max(case when job='ANALYST' then job_cnt else 0) as anals,
-					 max(case when job='SALESMAN' then job_cnt else 0) as smen
-		from (
-			select deptno, job,
-				count(*) over() as total,
-				count(*) over(partition by deptno) as emp_cnt,
-				count(*) over(partition by deptno, job) as job_cnt
-			from emp
-		) x
-		group by deptno, emp_cnt, total;
+select deptno,
+			 emp_cnt as dept_total,
+			 total,
+			 max(case when job='CLERK' then job_cnt else 0) as clerks,
+			 max(case when job='MANAGER' then job_cnt else 0) as managers,
+			 max(case when job='PRESIDENT' then job_cnt else 0) as prez,
+			 max(case when job='ANALYST' then job_cnt else 0) as anals,
+			 max(case when job='SALESMAN' then job_cnt else 0) as smen
+from (
+	select deptno, job,
+		count(*) over() as total,
+		count(*) over(partition by deptno) as emp_cnt,
+		count(*) over(partition by deptno, job) as job_cnt
+	from emp
+) x
+group by deptno, emp_cnt, total;
+```

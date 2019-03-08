@@ -2,7 +2,9 @@
 layout: page
 title: MySQL tutorial using SQL Cookbook
 description: This tutorial offers key essential lessons on how to use MySQL taught in SQL Cookbook (O'Reilly), along with instructions on how to set up MySQL on personal computer (Mac) and the example data for practice.
-output: ioslides_presentation
+output:
+  html_document:
+    highlight: pygments
 ---
 
 This tutorial offers key essential lessons on how to use MySQL taught in [SQL Cookbook (O'Reilly)](http://shop.oreilly.com/product/9780596009762.do), along with instructions on how to set up MySQL on personal computer (Mac) and the example data for practice.

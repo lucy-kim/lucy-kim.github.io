@@ -1,30 +1,32 @@
 ---
 layout: page
-title: Learn-SQL
+title: MySQL Tutorial using SQL Cookbook (O'Reilly)
 description: Collection of key essential lessons on how to write SQL queries from SQL Cookbook with instructions of how to set up MySQL on personal computer (Mac)
 ---
 
-# Learn SQL
+This tutorial offers key essential lessons on how to use MySQL taught in SQL Cookbook, alone with instructions on how to set up MySQL on personal computer (Mac) and the example data for practice.
 
-## Requirements
+## Setup
+
+### Requirements
 - Macbook
 - SQL Cookbook (Cookbooks (O'Reilly)). O'Reilly Media.
-	- They share a [code](https://resources.oreilly.com/examples/9780596009762) to create example data used in the book.
+	- They share a [code](https://resources.oreilly.com/examples/9780596009762) to create example data used in the book. I modified their code when practicing, which can be found [here](https://www.dropbox.com/s/tpar4hdprxekm6h/crsqlbook_data.txt?dl=0). Copy and paste this code into your mySQL prompter after starting it.
 
-## How to set up MySQL and example data
+### How to set up MySQL and example data
 
-### Download MySQL
+#### Download MySQL
 1. Go to the [MySQL download](https://dev.mysql.com/downloads/mysql/) website:
 2. For Mac, download `macOS 10.14 (x86, 64-bit), DMG Archive`
 
 If still unclear, check out video tutorial [how to install MySQL on Mac](https://www.youtube.com/watch?v=Tq0TXcH6dAU) by Linda.com.
 
-### Set up example data from the book on computer:
+#### Set up example data from the book on computer:
 1. Turn on the MySQL server on Preference Pane
 2. On Terminal, enter `./mysql -u root -p`
 	- If this is the first time you use MySQL on Mac, check out for more detailed instructions on password video tutorial on [how to start a MySQL](https://www.youtube.com/watch?v=q9S51sykd1A) by rudolfson.junior.
 3. Enter the password you chose
-3. Run code in crsqlbook_data.txt to create database “sqlbook_data” and 4 tables: “emp”, “dept”, “t10”, “t100”
+3. Run code in [crsqlbook_data.txt](https://www.dropbox.com/s/tpar4hdprxekm6h/crsqlbook_data.txt?dl=0) to create database “sqlbook_data” and 4 tables: “emp”, “dept”, “t10”, “t100”
 
 
 ## Key lessons from SQL Cookbook
@@ -68,11 +70,14 @@ From the perspective of someone with economics research background
 ### Sorting query results
 1. `order by col1, col2 desc`: sort by col1 in ascending, by col2 in descending order
 - sort by the **last** two characters of job title: use `substr()`
+
 		select ename, job
 		from emp
 		order by substr(job,length(job)-1);
 		% this substring = all characters from the first to the last char
+
 2. sort by `comm` if job is salesman, and by `sal` for all other jobs -> use `case` expression in the `order by`
+
 		select ename, sal, job, comm
 		from emp
 		order by

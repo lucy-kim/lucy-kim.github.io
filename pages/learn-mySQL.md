@@ -1,10 +1,11 @@
 ---
 layout: page
-title: MySQL Tutorial using SQL Cookbook (O'Reilly)
-description: Collection of key essential lessons on how to write SQL queries from SQL Cookbook with instructions of how to set up MySQL on personal computer (Mac)
+title: MySQL tutorial using SQL Cookbook
+description: This tutorial offers key essential lessons on how to use MySQL taught in SQL Cookbook (O'Reilly), along with instructions on how to set up MySQL on personal computer (Mac) and the example data for practice.
+output: ioslides_presentation
 ---
 
-This tutorial offers key essential lessons on how to use MySQL taught in SQL Cookbook, alone with instructions on how to set up MySQL on personal computer (Mac) and the example data for practice.
+This tutorial offers key essential lessons on how to use MySQL taught in [SQL Cookbook (O'Reilly)](http://shop.oreilly.com/product/9780596009762.do), along with instructions on how to set up MySQL on personal computer (Mac) and the example data for practice.
 
 ## Setup
 
@@ -72,7 +73,7 @@ From the perspective of someone with economics research background
 
 ### Sorting query results
 1. `order by col1, col2 desc`: sort by col1 in ascending, by col2 in descending order
-- sort by the **last** two characters of job title: use `substr()`
+2. sort by the **last** two characters of job title: use `substr()`
 ```sql
 select ename, job
 from emp

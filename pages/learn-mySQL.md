@@ -38,17 +38,20 @@ From the perspective of someone with economics research background
 	- This is why we need to have a query aliasing columns in an inline view, and then select * in the outer query, e.g.
 
 	- **WRONG:**
-			select sal as salary, comm as commission
-			     from emp
-			    where salary < 5000
+```sql
+	select sal as salary, comm as commission
+	     from emp
+	    where salary < 5000
+```
 	- **RIGHT:**
-			select *
-			   from (
-			 select sal as salary, comm as commission
-			   from emp
-			        ) x
-			  where salary < 5000
-
+```sql
+	select *
+	   from (
+	 select sal as salary, comm as commission
+	   from emp
+	        ) x
+	  where salary < 5000
+```
 2. Alias table created in the inline view, e.g. by *x*
 3. `concat(col1, “ character “, col2)` to concatenate column values (even if col1, col2 are numeric)
 4. Conditional logic variable syntax
@@ -70,30 +73,33 @@ From the perspective of someone with economics research background
 ### Sorting query results
 1. `order by col1, col2 desc`: sort by col1 in ascending, by col2 in descending order
 - sort by the **last** two characters of job title: use `substr()`
-
-		select ename, job
-		from emp
-		order by substr(job,length(job)-1);
-		% this substring = all characters from the first to the last char
-
+```sql
+select ename, job
+from emp
+order by substr(job,length(job)-1);
+% this substring = all characters from the first to the last char
+```
 2. sort by `comm` if job is salesman, and by `sal` for all other jobs -> use `case` expression in the `order by`
-
-		select ename, sal, job, comm
-		from emp
-		order by
-		   case
-		     when job='SALESMAN' then comm
-		     else sal
-		   end;
+```sql
+select ename, sal, job, comm
+from emp
+order by
+   case
+     when job='SALESMAN' then comm
+     else sal
+   end;
+```
 
 ### Working with multiple tables
 1. `union all` to stack rows from multiple tables; those tables must have same number and same data types of columns but not necessarily same names; if you want to remove duplicates (as in a real set concept), use `union`
 2. `inner join` syntax: e.g.
-		select e.ename, d.loc
-		from emp e
-		inner join dept d
-		on e.deptno=d.deptno
-		where e.deptno=10;
+```sql
+select e.ename, d.loc
+from emp e
+inner join dept d
+on e.deptno=d.deptno
+where e.deptno=10;
+```
 3. **Find it hard!!** Select values in a column that don't exist in the other table (including null values)
 		select d.deptno
 		  from dept d

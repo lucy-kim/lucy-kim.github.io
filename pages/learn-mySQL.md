@@ -261,7 +261,7 @@ where deptno=20
 group by sal
 having count(*) >= all (select count(*) from emp where deptno=20 group by sal);
 ```
-8. **(Hard!!)** Finding a **median** is also tricky: do a self-join
+8. **(Hard and didn't understand!!)** Finding a **median** is also tricky: do a self-join
 ```sql
 		select a.sal
 		from emp a, emp b
@@ -269,27 +269,6 @@ having count(*) >= all (select count(*) from emp where deptno=20 group by sal);
 		  and a.deptno=20
 		group by a.sal
 		having sum(case when a.sal = b.sal then 1 else 0 end) >= abs(sum(sign(e.sal - d.sal)));
-
-		select a.sal as sal1, b.sal as sal2, a.sal-b.sal as diff, sign(a.sal-b.sal) as sign,
-		from emp a, emp b
-		where a.deptno = b.deptno
-		and a.deptno=10
-		order by 1;
-
-		select sum(sign(a.sal-b.sal)) as sign,
-		from emp a, emp b
-		where a.deptno = b.deptno
-		and a.deptno=10
-		order by 1;
-
-		select e.sal,
-		          sum(case when e.sal=d.sal
-		                   then 1 else 0 end) as cnt1,
-		          abs(sum(sign(e.sal - d.sal))) as cnt2
-		     from emp e, emp d
-				 where e.deptno = d.deptno
-				       and e.deptno = 20
-				     group by e.sal;
 ```
 9. % salaries in deptno=10 out of total
 ```sql
@@ -324,7 +303,7 @@ select
 from V;
 ```
 
-### Working with dates
+### Date arithmetic
 1. Subtract 5 days/months/years from the date variable using `interval 5 day (month/year)` or `date_add` function
 ```sql
 select ename, hiredate,
@@ -390,8 +369,129 @@ from (
 5. Find the number of seconds, minutes, or hours between 2 dates
 ```sql
 select datediff(ward_hd, allen_hd)*24 as hr,
-
+			datediff(ward_hd, allen_hd)*24*60 as min,
+			datediff(ward_hd, allen_hd)*24*60*60 as sec
+from
+	(select hiredate as ward_hd from emp where ename='WARD') a,
+	(select hiredate as allen_hd from emp where ename='ALLEN') b;
 ```
+6. **(Involving many tricks!!)** Count the occurrences of each weekday in a year
+	- Use `cast(string as date)` to convert string to a date variable
+	- date_format(date, '%W') returns e.g. 'Monday'
+```sql
+select date_format(
+		cast(concat(year(current_date),'-01-01') as date) + interval t500.id-1 day, '%W') day,
+	count(*)
+from t500
+where t500.id <= datediff(
+			cast(concat(year(current_date)+1,'-01-01') as date),
+			cast(concat(year(current_date),'-01-01') as date))
+group by date_format(
+	cast(concat(year(current_date),'-01-01') as date) + interval t500.id-1 day, '%W');
+```
+7. **(Unfamiliar but important trick!!)** Find the date difference between the current record and the next one: Use the **scalar subquery**
+```sql
+select *, datediff(next_earliest_hd,hiredate) as gap
+from (select e.deptno, e.ename, e.hiredate,
+				(select min(d.hiredate)
+					from emp d
+					where d.deptno=e.deptno
+						and d.hiredate > e.hiredate) as next_earliest_hd
+			from emp e) x
+order by 1,3;
+```
+
+### Date manipulation
+1. Determine if it's a leap year, i.e. February ends on the 29th
+The solution in the book suggests using `lastday()` function but here's an alternative solution
+```sql
+select case when cast(concat(year(current_date)+1,'-02-28') as date) + interval 1 day=cast(concat(year(current_date)+1,'-03-01') as date) then 0
+				else 1
+				end as is_leapyear;
+```
+2. Determine the number of days in a year
+```sql
+select datediff(cast(concat(year(current_date),'-12-31') as date), cast(concat(year(current_date),'-01-01') as date))+1 as ndays;
+```
+or
+```sql
+select datediff(first_dayofyear+interval 1 year,first_dayofyear) as ndays
+from (select current_date-interval (dayofyear(current_date)-1) day as first_dayofyear) x;
+```
+5. **Skipped 9.3-9.9**
+6. Filling in missing dates: Find the number of employees hired in each month from 1980 to 1983
+
+	1) First get boundary months: January 1st of the earliest hiring date year - Dec 1st of the last hiring date year
+	```sql
+	select adddate(min(hiredate),-dayofyear(min(hiredate))+1) as min_hd,
+		cast(concat(year(max(hiredate)),'-12-01') as date) as max_hd
+	from emp;
+	```
+	2) Add rows for each month in the boundary date range
+	```sql
+	select x.min_hd+interval t.id-1 month as month
+	from (
+		select adddate(min(hiredate),-dayofyear(min(hiredate))+1) as min_hd,
+			cast(concat(year(max(hiredate)),'-12-01') as date) as max_hd
+		from emp
+	) x,
+	t500 t
+	where adddate(min_hd,interval t.id-1 month) <= max_hd;
+	```
+	3) Left outer join on the month of hiredate and count the number of non-NULL hiredates per month (this is final code)
+	```sql
+	select z.month, count(e.hiredate) num_hired
+	from (
+		select x.min_hd+interval t.id-1 month as month
+		from (
+			select adddate(min(hiredate),-dayofyear(min(hiredate))+1) as min_hd,
+				cast(concat(year(max(hiredate)),'-12-01') as date) as max_hd
+			from emp
+		) x,
+		t500 t
+		where adddate(min_hd,interval t.id-1 month) <= max_hd
+	) z
+	left join emp e
+	on (z.month=adddate(last_day(e.hiredate)-interval 1 month,1))
+	group by z.month
+	order by 1;
+	```
+7. Find all employees hired in February or December, or on a Tuesday
+```sql
+select sum(case when month(hiredate)=2 or month(hiredate)=12 then 1
+		else 0
+		end) as emp_feb_dec,
+		sum(case when dayname(hiredate)='Tuesday' then 1
+				else 0
+				end) as emp_tue
+from emp;
+select ename
+from emp
+where dayname(hiredate)='Tuesday' or monthname(hiredate) in ('February','December');
+```
+8. Comparing records using specific units of time: Which employees were hired on the same weekday and same month?
+Do a self-join to compare dates but remove reciprocals
+```sql
+select concat(e.ename, ' was hired on the same month and same weekday as ', d.ename) as msg
+from emp e, emp d
+where date_format(e.hiredate,'%w%M')=date_format(d.hiredate,'%w%M')
+	and e.empno < d.empno
+order by e.ename;
+```
+9. Identifying overlapping date ranges
+```sql
+select b.empno, b.ename, concat('project ',b.proj_id,' overlaps project ',a.proj_id) as msg
+from emp_project a, emp_project b
+where a.empno=b.empno
+  and b.proj_start >= a.proj_start
+	and b.proj_start <= a.proj_end
+	and a.proj_id < b.proj_id;
+```
+
+### Working with ranges
+1. **Skipped 10.1-10.4**
+2. Generating consecutive numeric values
+
 
 ### Window function refresher
 1. Number of employees in the department and job, respectively, for each employee's department/job
@@ -457,7 +557,9 @@ from (
 group by deptno, emp_cnt, total;
 ```
 
+
 ### Errata I'd like to report:
 - p.193 MySQL solution for using `datediff(d1,d2)` returns **d1-d2**, so should put **earlier** date **last** to return postiive difference.
 - p.195 typo: "January 10th is a Tuesday and January 11th is a Monday" - since it's a hypothetical situation, dates don't have to matter but just for accuracy
 - Ch 8.5 uses table "T500" but the provided code doesn't create this table; instead use the table "T100"
+- p.253 typo 'Mysol'; should be 'MySQL'

@@ -4,7 +4,7 @@ title: MySQL tutorial using SQL Cookbook
 description: This tutorial offers key essential lessons on how to use MySQL taught in SQL Cookbook (O'Reilly), along with instructions on how to set up MySQL on personal computer (Mac) and the example data for practice.
 ---
 
-This tutorial offers key essential lessons on how to use MySQL taught in [SQL Cookbook (O'Reilly)](http://shop.oreilly.com/product/9780596009762.do), along with instructions on how to set up MySQL on personal computer (Mac) and the example data for practice.
+This tutorial compiles key essential lessons on how to use MySQL taught in [SQL Cookbook (O'Reilly)](http://shop.oreilly.com/product/9780596009762.do), along with instructions on how to set up MySQL on personal computer (Mac) and the example data for practice. Most solutions/example codes are from the book.
 
 ## Setup
 
@@ -31,7 +31,7 @@ If still unclear, check out video tutorial [how to install MySQL on Mac](https:/
 
 ## Key lessons from SQL Cookbook
 
-From the perspective of someone with economics research background
+From the perspective of someone with nonzero but minimal *SQL* experience (in *SAS*)
 
 ### Retrieve records
 1. The order in which the SQL queries are evaluated (p. 4): `FROM` clause ->  `WHERE` -> `SELECT` or `GROUP BY` -> `SELECT`
@@ -211,6 +211,7 @@ select ename, comm
 from emp
 where coalesce(comm,0) < (select coalesce(comm,0) from emp where ename='WARD');
 ```
+10. Extract numbers from alphanumeric var: e.g. get 123321 from 'paul123f321'
 
 ### Working with numbers
 1. `avg(col)` to compute average; can be combined with `group by`
@@ -290,6 +291,108 @@ having count(*) >= all (select count(*) from emp where deptno=20 group by sal);
 				       and e.deptno = 20
 				     group by e.sal;
 ```
+9. % salaries in deptno=10 out of total
+```sql
+select 100*sum(case when deptno=10 then sal
+			  end)/sum(sal) as pct_dept10
+from emp;
+```
+10. Take average after excluding the highest and lowest values
+```sql
+select avg(sal)
+from emp
+where sal not in (
+	(select min(sal) from emp),
+	(select max(sal) from emp)
+);
+```
+The above code may drop multiple employees, if they have highest or lowest salary. If you want to exclude only the highest and lowest value once each, just exclude them and divide by the total (N-2):
+```sql
+select (sum(sal)-min(sal)-max(sal))/(count(*)-2) as pct
+from emp;
+```
+11. Update the total balance column (i.e. running total) after each transaction row, which can be either 'purchase' or 'payment'
+```sql
+select
+	case when trx='PR' then 'Purchase'
+	else 'Payment'
+	end as trx_type,
+	amt,
+	sum(case when trx='PR' then amt
+		 	else -amt
+			end) over(order by id) as balance
+from V;
+```
+
+### Working with dates
+1. Subtract 5 days/months/years from the date variable using `interval 5 day (month/year)` or `date_add` function
+```sql
+select ename, hiredate,
+ 		hiredate-interval 5 day as hd_minus_5d,
+		hiredate+interval 5 month as hd_plus_5m,
+		hiredate-interval 5 year as hd_minus_5y
+from emp
+where deptno=10;
+```
+or
+```sql
+select ename, hiredate,
+		date_add(hiredate, interval -5 day) as hd_minus_5d,
+		date_add(hiredate, interval +5 month) as hd_plus_5m,
+		date_add(hiredate, interval +5 year) as hd_plus_5y
+from emp
+where deptno=10;
+```
+2. Find the number of days between 2 dates (e.g. hiring dates for Allen and Ward) using `datediff(d1,d2)`:=d1-d2; _put the earlier date last in the 2 arguments_
+```sql
+select datediff(ward_hd, allen_hd)
+from (
+	select hiredate as ward_hd
+	from emp
+	where ename='WARD'
+) x,
+(select hiredate as allen_hd
+from emp
+where ename='ALLEN') y;
+```
+3. **(New trick!!)** Find the number of business days between 2 dates; Requires 2 steps:
+
+	1) get two dates and create rows for each day between those dates
+	2) count number of rows (i.e. days), excluding weekends
+```sql
+select sum(case when date_format(jones_hd+interval (id-1) day, '%a') in ('Sat','Sun') then 0
+					else 1
+					end) as biz_days,
+		max(id) as days
+from (
+	select max(case when ename = 'BLAKE' then hiredate
+				end) as blake_hd,
+				max(case when ename='JONES' then hiredate
+				end) as jones_hd
+		from emp
+		where ename in ('BLAKE','JONES')) x,
+		t100
+where t100.id <= datediff(blake_hd,jones_hd)+1;
+```
+4. Find the number of months or years between 2 dates: use `year` and `month` functions
+```sql
+select
+	n_month, round(n_month/12,0) as n_year
+from (
+		select (year(last_hd)-year(first_hd))*12 + (month(last_hd)-month(first_hd)) as n_month
+		from (
+			select min(hiredate) as first_hd,
+				   max(hiredate) as last_hd
+			from emp
+				 ) x
+		) y;
+```
+5. Find the number of seconds, minutes, or hours between 2 dates
+```sql
+select datediff(ward_hd, allen_hd)*24 as hr,
+
+```
+
 ### Window function refresher
 1. Number of employees in the department and job, respectively, for each employee's department/job
 ```sql
@@ -353,3 +456,8 @@ from (
 ) x
 group by deptno, emp_cnt, total;
 ```
+
+### Errata I'd like to report:
+- p.193 MySQL solution for using `datediff(d1,d2)` returns **d1-d2**, so should put **earlier** date **last** to return postiive difference.
+- p.195 typo: "January 10th is a Tuesday and January 11th is a Monday" - since it's a hypothetical situation, dates don't have to matter but just for accuracy
+- Ch 8.5 uses table "T500" but the provided code doesn't create this table; instead use the table "T100"

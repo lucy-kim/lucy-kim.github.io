@@ -488,11 +488,6 @@ where a.empno=b.empno
 	and a.proj_id < b.proj_id;
 ```
 
-### Working with ranges
-1. **Skipped 10.1-10.4**
-2. Generating consecutive numeric values
-
-
 ### Window function refresher
 1. Number of employees in the department and job, respectively, for each employee's department/job
 ```sql

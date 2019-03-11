@@ -54,12 +54,14 @@ From the perspective of someone with nonzero but minimal *SQL* experience (in *S
 ```
 2. Alias table created in the inline view, e.g. by *x*
 3. `concat(col1, “ character “, col2)` to concatenate column values (even if col1, col2 are numeric)
-4. Conditional logic variable syntax
-		case
-			when col1 < 2000 then 1
-			when col2 > 3000 then 2
-			else 3
-		end as conditional
+4. Conditional logic variable syntax of the form; don't forget `end` at the end!!
+```sql
+case
+	when col1 < 2000 then 1
+	when col2 > 3000 then 2
+	else 3
+end as conditional
+```
 5. `limit 5` at the end of query: show the first 5 observations
 6. Randomly select 5 rows with `order by rand() limit 5`
 7. `where col1 is null` or `where col1 is not null` (never use col1!=null)
@@ -487,6 +489,29 @@ where a.empno=b.empno
 	and b.proj_start <= a.proj_end
 	and a.proj_id < b.proj_id;
 ```
+
+### Advanced searching
+1. Skipped **11.1**
+2. Skipping n rows in a table: e.g. show employees in odd rows
+```sql
+select x.rn, x.ename
+from (select a.ename,
+			(select count(*)
+			from emp b
+			where b.empno <= a.empno) as rn
+from emp a) x
+where mod(x.rn,2)!=0;
+```
+or
+```sql
+select x.rn, x.ename
+from (select a.ename, count(*) over(order by empno
+															range between unbounded preceding and current row) as rn
+from emp a) x
+where mod(x.rn,2)!=0;
+```
+
+
 
 ### Window function refresher
 1. Number of employees in the department and job, respectively, for each employee's department/job

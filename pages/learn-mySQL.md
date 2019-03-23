@@ -4,7 +4,8 @@ title: MySQL tutorial using SQL Cookbook
 description: This tutorial offers key essential lessons on how to use MySQL taught in SQL Cookbook (O'Reilly), along with instructions on how to set up MySQL on personal computer (Mac) and the example data for practice.
 ---
 
-This tutorial compiles key essential lessons on how to use MySQL taught in [SQL Cookbook (O'Reilly)](http://shop.oreilly.com/product/9780596009762.do), along with instructions on how to set up MySQL on personal computer (Mac) and the example data for practice. Most solutions/example codes are from the book.
+This tutorial compiles key essential lessons on how to use MySQL taught in [SQL Cookbook (O'Reilly)](http://shop.oreilly.com/product/9780596009762.do), along with instructions on how to set up MySQL on personal computer (Mac) and the example data for practice. Most solutions/example codes are from the book. Some points are highlighted from the perspective of someone with nonzero but minimal *SQL* experience (in *SAS*).
+
 
 ## Setup
 
@@ -511,8 +512,36 @@ from (select a.ename, count(*) over(order by empno
 from emp a) x
 where mod(x.rn,2)!=0;
 ```
-
-
+3. Selecting the top _n_ records: 1) rank, 2) limit to _n_ records; use scalar subquery!!
+If you want to find the top 3 salary employees out of all employees:
+```sql
+select x.ename, x.sal
+from (select a.ename, a.sal,
+							(select count(*) from emp b where b.sal >= a.sal) as rn
+			from emp a) x
+where x.rn <=3
+order by 2 desc,1;
+```
+If you want to find the top 3 salary employees in each department:
+```sql
+select x.deptno, x.ename, x.sal
+from (select a.deptno, a.ename, a.sal,
+						(select count(*) from emp b where b.sal >= a.sal and b.deptno=a.deptno) as rn
+			from emp a) x
+where x.rn <=3
+order by 1,3 desc, 2;
+```
+In case, there are multiple employees with same salry within a department, and want to count the top 3 _distinct_ salary employees (i.e. there can be more than 3 employees per department in the output), restrict to distcint salary in each department in the scalar subquery:
+```sql
+select x.deptno, x.ename, x.sal
+from (select a.deptno, a.ename, a.sal,
+						(select count(*)
+						 from (select distinct sal, deptno from emp) b
+						 where b.sal >= a.sal and b.deptno=a.deptno) as rn
+			from emp a) x
+where x.rn <=3
+order by 1,3 desc, 2;
+```
 
 ### Window function refresher
 1. Number of employees in the department and job, respectively, for each employee's department/job

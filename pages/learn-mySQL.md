@@ -60,9 +60,9 @@ From the perspective of someone with nonzero but minimal *SQL* experience (in *S
 4. Conditional logic variable syntax of the form; don't forget `end` at the end!!
 ```sql
 case
-	when col1 < 2000 then 1
-	when col2 > 3000 then 2
-	else 3
+		when col1 < 2000 then 1
+		when col2 > 3000 then 2
+		else 3
 end as conditional
 ```
 5. `limit 5` at the end of query: show the first 5 observations
@@ -110,32 +110,34 @@ where e.deptno=10;
 select d.deptno
   from dept d
  where not exists (
-   select 1
+     select 1
      from new_dept nd
-    where d.deptno = nd.deptno);
+     where d.deptno = nd.deptno);
 ```
 4. Select rows that don't exist in another table
 ```sql
 select d.*
 from dept d
-left (outer) join emp e
+left outer join emp e
 on (d.deptno=e.deptno)
 where e.deptno is null;
 ```
 5. Add new information in the left table by merging with other table
 ```sql
 select e.ename, d.loc, eb.received
-from emp e join dept d
-	on (e.deptno=d.deptno)
+from emp e
+join dept d
+on (e.deptno=d.deptno)
 left join emp_bonus eb
-	on (e.empno=eb.empno)
+on (e.empno=eb.empno)
 order by 2;
 ```
 or
 ```sql
 select e.ename, d.loc,
-	(select eb.received from emp_bonus eb
-	 where eb.empno=e.empno) as received
+         (select eb.received
+          from emp_bonus eb
+          where eb.empno=e.empno) as received
 from emp e, dept d
 where e.deptno=d.deptno
 order by 2;
@@ -146,16 +148,16 @@ order by 2;
 ```sql
 select deptno, sum(distinct sal) as tot_salary, sum(bonus) as tot_bonus
 from (
-	select e.empno, e.ename, e.deptno, e.sal,
-		e.sal*case
-				when eb.type=1 then 0.1
-				when eb.type=2 then 0.2
-				else 0.3
-			end as bonus
-	from emp e, emp_bonus eb
-	where e.empno=eb.empno
-	and e.deptno=10
-) x
+		select e.empno, e.ename, e.deptno, e.sal,
+			   e.sal*case
+						when eb.type=1 then 0.1
+						when eb.type=2 then 0.2
+						else 0.3
+					 end as bonus
+		from emp e, emp_bonus eb
+		where e.empno=eb.empno
+		and   e.deptno=10
+        ) x
 group by deptno, tot_salary;
 ```
 or 2) Sum employee salary first and merge
@@ -165,13 +167,13 @@ select d.deptno, d.tot_salary,
 							when eb.type=2 then 0.2
 							else 0.3 end) as tot_bonus
 from emp e,
-	 emp_bonus eb,
-	 (select deptno, sum(sal) as tot_salary
-		  from emp
-			where deptno=10
-			group by deptno) d
-where e.empno=eb.empno and
-			e.deptno=d.deptno
+	    emp_bonus eb,
+	    (select deptno, sum(sal) as tot_salary
+		 from emp
+		 where deptno=10
+		 group by deptno) d
+where e.empno=eb.empno
+and   e.deptno=d.deptno
 group by deptno, tot_salary;
 ```
 7. Performing outer joins when using aggregates: sum salary and bonus for deptno=10 when bonus data don't contain bonuses for all employees in deptno=10
@@ -181,22 +183,24 @@ from (select e.deptno, e.ename, e.sal,
 					e.sal*case when eb.type is null then 0
 										 else eb.type/10
 								end as bonus
-	  from emp e
-	  left outer join emp_bonus eb
-		on (e.empno=eb.empno)
-		where deptno=10) x
+		 from emp e
+		 left outer join emp_bonus eb
+		 on (e.empno=eb.empno)
+		 where deptno=10) x
 group by deptno, tot_salary;
 ```
 or same as the 2nd solution in \#6:
 ```sql
 select d.deptno, d.tot_salary,
-	sum(e.sal*eb.type/10) as tot_bonus
+		  sum(e.sal*eb.type/10) as tot_bonus
 from emp e,
-		 emp_bonus eb,
-		 (select deptno, sum(sal) as tot_salary from emp where deptno=10 group by deptno) d
-		 where e.empno=eb.empno and
-		 	 e.deptno=d.deptno
-		group by deptno, tot_salary;
+        emp_bonus eb,
+		(select deptno, sum(sal) as tot_salary
+		 from emp
+		 where deptno=10 group by deptno) d
+where e.empno=eb.empno
+and   e.deptno=d.deptno
+group by deptno, tot_salary;
 ```
 8. Returning missing data from both merging tables -> `union` the results of 2 different outer joins (can't be done soley by `left join` or `right join` one at a time)
 ```sql
@@ -225,15 +229,16 @@ where coalesce(comm,0) < (select coalesce(comm,0) from emp where ename='WARD');
 4. Running total without using window function but with scalar subquery
 ```sql
 select e.ename, e.sal,
-	(select sum(d.sal) from emp d
-		where d.empno <= e.empno) as run_total
+		(select sum(d.sal)
+		 from emp d
+		 where d.empno <= e.empno) as run_total
 from emp e
 order by 3;
 ```
 Note this can be done more concisely using `sum() over()`:
 ```sql
 select ename, sal,
-	sum(sal) over(order by sal)
+		  sum(sal) over(order by sal)
 from emp;
 ```
 5. Running product - take sum of logs `ln(sal)` and exponentiate
@@ -241,17 +246,18 @@ Note: this doesn't work if `sal` <=0 since you can't take log of non-positive va
 ```sql
 select ename, sal, round(exp(log),0)
 from (
-select ename, sal,
-	sum(ln(sal)) over(order by sal) as log
-from emp
-) x;
+		select ename, sal,
+			sum(ln(sal)) over(order by sal) as log
+		from emp
+		) x;
 ```
 or
 ```sql
 select e.ename, e.sal,
-	(select round(exp(sum(ln(d.sal))),0) from emp d
-		where d.empno <= e.empno and
-			d.deptno=e.deptno) as run_product
+		(select round(exp(sum(ln(d.sal))),0)
+		 from emp d
+	 	where d.empno <= e.empno
+		 and   d.deptno=e.deptno) as run_product
 from emp e
 where e.deptno=10;
 ```
@@ -268,17 +274,17 @@ having count(*) >= all (select count(*) from emp where deptno=20 group by sal);
 ```
 8. **(Hard and didn't understand!!)** Finding a **median** is also tricky: do a self-join
 ```sql
-		select a.sal
-		from emp a, emp b
-		where a.deptno=b.deptno
-		  and a.deptno=20
-		group by a.sal
-		having sum(case when a.sal = b.sal then 1 else 0 end) >= abs(sum(sign(e.sal - d.sal)));
+select a.sal
+from emp a, emp b
+where a.deptno=b.deptno
+and   a.deptno=20
+group by a.sal
+having sum(case when a.sal = b.sal then 1 else 0 end) >= abs(sum(sign(e.sal - d.sal)));
 ```
 9. % salaries in deptno=10 out of total
 ```sql
 select 100*sum(case when deptno=10 then sal
-			  end)/sum(sal) as pct_dept10
+			  	end)/sum(sal) as pct_dept10
 from emp;
 ```
 10. Take average after excluding the highest and lowest values
@@ -286,8 +292,8 @@ from emp;
 select avg(sal)
 from emp
 where sal not in (
-	(select min(sal) from emp),
-	(select max(sal) from emp)
+		(select min(sal) from emp),
+		(select max(sal) from emp)
 );
 ```
 The above code may drop multiple employees, if they have highest or lowest salary. If you want to exclude only the highest and lowest value once each, just exclude them and divide by the total (N-2):
@@ -298,12 +304,12 @@ from emp;
 11. Update the total balance column (i.e. running total) after each transaction row, which can be either 'purchase' or 'payment'
 ```sql
 select
-	case when trx='PR' then 'Purchase'
-	else 'Payment'
-	end as trx_type,
-	amt,
-	sum(case when trx='PR' then amt
-		 	else -amt
+		case when trx='PR' then 'Purchase'
+			 else 'Payment'
+		end as trx_type,
+		amt,
+		sum(case when trx='PR' then amt
+			 	else -amt
 			end) over(order by id) as balance
 from V;
 ```
@@ -312,7 +318,7 @@ from V;
 1. Subtract 5 days/months/years from the date variable using `interval 5 day (month/year)` or `date_add` function
 ```sql
 select ename, hiredate,
- 		hiredate-interval 5 day as hd_minus_5d,
+	    hiredate-interval 5 day as hd_minus_5d,
 		hiredate+interval 5 month as hd_plus_5m,
 		hiredate-interval 5 year as hd_minus_5y
 from emp
@@ -330,14 +336,12 @@ where deptno=10;
 2. Find the number of days between 2 dates (e.g. hiring dates for Allen and Ward) using `datediff(d1,d2)`:=d1-d2; _put the earlier date last in the 2 arguments_
 ```sql
 select datediff(ward_hd, allen_hd)
-from (
-	select hiredate as ward_hd
-	from emp
-	where ename='WARD'
-) x,
-(select hiredate as allen_hd
-from emp
-where ename='ALLEN') y;
+from (select hiredate as ward_hd
+		from emp
+		where ename='WARD') x,
+		(select hiredate as allen_hd
+		from emp
+		where ename='ALLEN') y;
 ```
 3. **(New trick!!)** Find the number of business days between 2 dates; Requires 2 steps:
 
@@ -345,40 +349,40 @@ where ename='ALLEN') y;
 	2) count number of rows (i.e. days), excluding weekends
 ```sql
 select sum(case when date_format(jones_hd+interval (id-1) day, '%a') in ('Sat','Sun') then 0
-					else 1
-					end) as biz_days,
+				   else 1
+			  end) as biz_days,
 		max(id) as days
 from (
-	select max(case when ename = 'BLAKE' then hiredate
-				end) as blake_hd,
-				max(case when ename='JONES' then hiredate
-				end) as jones_hd
+		select max(case when ename = 'BLAKE' then hiredate
+				   end) as blake_hd,
+			   max(case when ename='JONES' then hiredate
+				   end) as jones_hd
 		from emp
-		where ename in ('BLAKE','JONES')) x,
+		where ename in ('BLAKE','JONES')
+	    ) x,
 		t100
 where t100.id <= datediff(blake_hd,jones_hd)+1;
 ```
 4. Find the number of months or years between 2 dates: use `year` and `month` functions
 ```sql
-select
-	n_month, round(n_month/12,0) as n_year
+select n_month, round(n_month/12,0) as n_year
 from (
 		select (year(last_hd)-year(first_hd))*12 + (month(last_hd)-month(first_hd)) as n_month
 		from (
-			select min(hiredate) as first_hd,
-				   max(hiredate) as last_hd
-			from emp
-				 ) x
+			  select min(hiredate) as first_hd,
+			  	   max(hiredate) as last_hd
+			  from emp
+			 ) x
 		) y;
 ```
 5. Find the number of seconds, minutes, or hours between 2 dates
 ```sql
 select datediff(ward_hd, allen_hd)*24 as hr,
-			datediff(ward_hd, allen_hd)*24*60 as min,
-			datediff(ward_hd, allen_hd)*24*60*60 as sec
+		  datediff(ward_hd, allen_hd)*24*60 as min,
+		  datediff(ward_hd, allen_hd)*24*60*60 as sec
 from
-	(select hiredate as ward_hd from emp where ename='WARD') a,
-	(select hiredate as allen_hd from emp where ename='ALLEN') b;
+(select hiredate as ward_hd from emp where ename='WARD') a,
+(select hiredate as allen_hd from emp where ename='ALLEN') b;
 ```
 6. **(Involving many tricks!!)** Count the occurrences of each weekday in a year
 	- Use `cast(string as date)` to convert string to a date variable
@@ -399,10 +403,10 @@ group by date_format(
 select *, datediff(next_earliest_hd,hiredate) as gap
 from (select e.deptno, e.ename, e.hiredate,
 				(select min(d.hiredate)
-					from emp d
-					where d.deptno=e.deptno
-						and d.hiredate > e.hiredate) as next_earliest_hd
-			from emp e) x
+				 from emp d
+				 where d.deptno=e.deptno
+				 and   d.hiredate > e.hiredate) as next_earliest_hd
+		 from emp e) x
 order by 1,3;
 ```
 
@@ -411,8 +415,8 @@ order by 1,3;
 The solution in the book suggests using `lastday()` function but here's an alternative solution
 ```sql
 select case when cast(concat(year(current_date)+1,'-02-28') as date) + interval 1 day=cast(concat(year(current_date)+1,'-03-01') as date) then 0
-				else 1
-				end as is_leapyear;
+			   else 1
+		  end as is_leapyear;
 ```
 2. Determine the number of days in a year
 ```sql
@@ -464,11 +468,11 @@ from (select current_date-interval (dayofyear(current_date)-1) day as first_dayo
 7. Find all employees hired in February or December, or on a Tuesday
 ```sql
 select sum(case when month(hiredate)=2 or month(hiredate)=12 then 1
-		else 0
-		end) as emp_feb_dec,
-		sum(case when dayname(hiredate)='Tuesday' then 1
-				else 0
-				end) as emp_tue
+		           else 0
+		      end) as emp_feb_dec,
+		  sum(case when dayname(hiredate)='Tuesday' then 1
+				   else 0
+			  end) as emp_tue
 from emp;
 select ename
 from emp
@@ -480,7 +484,7 @@ Do a self-join to compare dates but remove reciprocals
 select concat(e.ename, ' was hired on the same month and same weekday as ', d.ename) as msg
 from emp e, emp d
 where date_format(e.hiredate,'%w%M')=date_format(d.hiredate,'%w%M')
-	and e.empno < d.empno
+and   e.empno < d.empno
 order by e.ename;
 ```
 9. Identifying overlapping date ranges
@@ -488,9 +492,9 @@ order by e.ename;
 select b.empno, b.ename, concat('project ',b.proj_id,' overlaps project ',a.proj_id) as msg
 from emp_project a, emp_project b
 where a.empno=b.empno
-  and b.proj_start >= a.proj_start
-	and b.proj_start <= a.proj_end
-	and a.proj_id < b.proj_id;
+and   b.proj_start >= a.proj_start
+and   b.proj_start <= a.proj_end
+and   a.proj_id < b.proj_id;
 ```
 
 ### Advanced searching
@@ -499,18 +503,19 @@ where a.empno=b.empno
 ```sql
 select x.rn, x.ename
 from (select a.ename,
-			(select count(*)
-			from emp b
-			where b.empno <= a.empno) as rn
-from emp a) x
+				(select count(*)
+				from emp b
+				where b.empno <= a.empno) as rn
+		 from emp a) x
 where mod(x.rn,2)!=0;
 ```
 or
 ```sql
 select x.rn, x.ename
-from (select a.ename, count(*) over(order by empno
-															range between unbounded preceding and current row) as rn
-from emp a) x
+from (select a.ename,
+				count(*) over(order by empno
+							  range between unbounded preceding and current row) as rn
+		 from emp a) x
 where mod(x.rn,2)!=0;
 ```
 3. Selecting the top _n_ records: 1) rank, 2) limit to _n_ records; use scalar subquery!!
@@ -518,8 +523,8 @@ If you want to find the top 3 salary employees out of all employees:
 ```sql
 select x.ename, x.sal
 from (select a.ename, a.sal,
-							(select count(*) from emp b where b.sal >= a.sal) as rn
-			from emp a) x
+				(select count(*) from emp b where b.sal >= a.sal) as rn
+		 from emp a) x
 where x.rn <=3
 order by 2 desc,1;
 ```
@@ -527,8 +532,8 @@ If you want to find the top 3 salary employees in each department:
 ```sql
 select x.deptno, x.ename, x.sal
 from (select a.deptno, a.ename, a.sal,
-						(select count(*) from emp b where b.sal >= a.sal and b.deptno=a.deptno) as rn
-			from emp a) x
+				(select count(*) from emp b where b.sal >= a.sal and b.deptno=a.deptno) as rn
+		 from emp a) x
 where x.rn <=3
 order by 1,3 desc, 2;
 ```
@@ -536,10 +541,10 @@ In case, there are multiple employees with same salry within a department, and w
 ```sql
 select x.deptno, x.ename, x.sal
 from (select a.deptno, a.ename, a.sal,
-						(select count(*)
-						 from (select distinct sal, deptno from emp) b
-						 where b.sal >= a.sal and b.deptno=a.deptno) as rn
-			from emp a) x
+				(select count(*)
+				 from (select distinct sal, deptno from emp) b
+				 where b.sal >= a.sal and b.deptno=a.deptno) as rn
+		 from emp a) x
 where x.rn <=3
 order by 1,3 desc, 2;
 ```
@@ -548,34 +553,33 @@ order by 1,3 desc, 2;
 1. Number of employees in the department and job, respectively, for each employee's department/job
 ```sql
 select ename, deptno, job,
-	count(*) over(partition by deptno) as dept_cnt,
-	count(*) over(partition by job) as job_cnt
+		  count(*) over(partition by deptno) as dept_cnt,
+		  count(*) over(partition by job) as job_cnt
 from emp
 order by 2;
 ```
 2. Running total of salaries for employees in deptno=10
 ```sql
 select deptno, ename, hiredate, sal,
-	sum(sal) over(partition by deptno) as total1,
-	sum(sal) over() as total2,
-	sum(sal) over(order by hiredate) as running_total
+		  sum(sal) over(partition by deptno) as total1,
+	  	sum(sal) over() as total2,
+		  sum(sal) over(order by hiredate) as running_total
 from emp
 where deptno=10;
 ```
 	You can use framing clauses like `range between unbounded preceding and current row` (default if unspecified), `rows between 1 preceding and 1 following`
 ```sql
 select deptno, ename, hiredate, sal,
-	sum(sal) over(partition by deptno) as total1,
-	sum(sal) over() as total2,
-	sum(sal) over(order by hiredate
-							  range between unbounded preceding and current row) as running_total1,
-	sum(sal) ove2(order by hiredate
-								rows between 1 preceding and current row) as running_total2,
-	sum(sal) over(order by hiredate
-							  range between current row and unbounded following) as running_total3,
-	sum(sal) over(order by hiredate
-								rows between 1 preceding and
-								1 following) as running_total4
+		  sum(sal) over(partition by deptno) as total1,
+		  sum(sal) over() as total2,
+	  	sum(sal) over(order by hiredate
+						range between unbounded preceding and current row) as running_total1,
+	  	sum(sal) ove2(order by hiredate
+						rows between 1 preceding and current row) as running_total2,
+	  	sum(sal) over(order by hiredate
+						range between current row and unbounded following) as running_total3,
+	  	sum(sal) over(order by hiredate
+						rows between 1 preceding and 1 following) as running_total4
 from emp
 where deptno=10;
 ```
@@ -584,26 +588,26 @@ where deptno=10;
 4. To answer: "What is the number of employees in each dept, how many different types of employees in each dept, how many total employees in table?"
 ```sql
 select deptno, job,
-			 count(*) over(partition by deptno) as nemp_dept,
-		   count(*) over(partition by deptno, job) as nemp_job_dept,
-			 count(*) over() as tot_employees
+		count(*) over(partition by deptno) as nemp_dept,
+		count(*) over(partition by deptno, job) as nemp_job_dept,
+		count(*) over() as tot_employees
 from emp;
 ```
 ```sql
 select deptno,
-			 emp_cnt as dept_total,
-			 total,
-			 max(case when job='CLERK' then job_cnt else 0) as clerks,
-			 max(case when job='MANAGER' then job_cnt else 0) as managers,
-			 max(case when job='PRESIDENT' then job_cnt else 0) as prez,
-			 max(case when job='ANALYST' then job_cnt else 0) as anals,
-			 max(case when job='SALESMAN' then job_cnt else 0) as smen
+		  emp_cnt as dept_total,
+		  total,
+		  max(case when job='CLERK' then job_cnt else 0) as clerks,
+		  max(case when job='MANAGER' then job_cnt else 0) as managers,
+		  max(case when job='PRESIDENT' then job_cnt else 0) as prez,
+		  max(case when job='ANALYST' then job_cnt else 0) as anals,
+		  max(case when job='SALESMAN' then job_cnt else 0) as smen
 from (
-	select deptno, job,
-		count(*) over() as total,
-		count(*) over(partition by deptno) as emp_cnt,
-		count(*) over(partition by deptno, job) as job_cnt
-	from emp
+	  select deptno, job,
+	  	count(*) over() as total,
+		  count(*) over(partition by deptno) as emp_cnt,
+		  count(*) over(partition by deptno, job) as job_cnt
+	  from emp
 ) x
 group by deptno, emp_cnt, total;
 ```

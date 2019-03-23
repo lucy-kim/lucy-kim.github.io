@@ -37,23 +37,24 @@ From the perspective of someone with nonzero but minimal *SQL* experience (in *S
 
 ### Retrieve records
 1. The order in which the SQL queries are evaluated (p. 4): `FROM` clause ->  `WHERE` -> `SELECT` or `GROUP BY` -> `SELECT`
-	- This is why we need to have a query aliasing columns in an inline view, and then select * in the outer query, e.g.
 
-	- **WRONG:**
-```sql
+	This is why we need to have a query aliasing columns in an inline view, and then select * in the outer query, e.g.
+
+	**WRONG:**
+	```sql
 	select sal as salary, comm as commission
-	     from emp
-	    where salary < 5000
-```
-	- **RIGHT:**
-```sql
+	from emp
+	where salary < 5000;
+	```
+	**RIGHT:**
+	```sql
 	select *
-	   from (
-	 select sal as salary, comm as commission
-	   from emp
+	from (
+		select sal as salary, comm as commission
+	    from emp
 	        ) x
-	  where salary < 5000
-```
+	where salary < 5000;
+	```
 2. Alias table created in the inline view, e.g. by *x*
 3. `concat(col1, “ character “, col2)` to concatenate column values (even if col1, col2 are numeric)
 4. Conditional logic variable syntax of the form; don't forget `end` at the end!!

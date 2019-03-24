@@ -1,18 +1,17 @@
 ---
 layout: page
-title: MySQL tutorial using SQL Cookbook
+title: MySQL tutorial using SQL Cookbook (O'Reilly)
 description: This tutorial offers key essential lessons on how to use MySQL taught in SQL Cookbook (O'Reilly), along with instructions on how to set up MySQL on personal computer (Mac) and the example data for practice.
 ---
 
-This tutorial compiles key essential lessons on how to use MySQL taught in [SQL Cookbook (O'Reilly)](http://shop.oreilly.com/product/9780596009762.do), along with instructions on how to set up MySQL on personal computer (Mac) and the example data for practice. Most solutions/example codes are from the book. Some points are highlighted from the perspective of someone with nonzero but minimal *SQL* experience (in *SAS*).
-
+In this tutorial, I compiled key lessons from the [SQL Cookbook](http://shop.oreilly.com/product/9780596009762.do) (by Anthony Molinaro and published in O'Reilly) from the perspective of someone with nonzero but minimal _SQL_ experience. I offer instructions on how to set up _MySQL_ on a personal computer (Mac) and work through selected examples from the book, also discussing alternative solutions I came up with for some problems.
 
 ## Setup
 
 ### Requirements
 - Macbook
-- SQL Cookbook (Cookbooks (O'Reilly)). O'Reilly Media.
-	- They share a [code](https://resources.oreilly.com/examples/9780596009762) to create example data used in the book. I modified their code when practicing, which can be found [here](https://www.dropbox.com/s/tpar4hdprxekm6h/crsqlbook_data.txt?dl=0). Copy and paste this code into your mySQL prompter after starting it.
+- SQL Cookbook. O'Reilly Media.
+	- They share a [code](https://resources.oreilly.com/examples/9780596009762) to create example data used in the book. I slightly modified their code to add some new datasets which were not already included and share my code [here](https://www.dropbox.com/s/tpar4hdprxekm6h/crsqlbook_data.txt?dl=0). Copy and paste this code into your MySQL prompter after starting it.
 
 ### How to set up MySQL and example data
 
@@ -32,8 +31,6 @@ If still unclear, check out video tutorial [how to install MySQL on Mac](https:/
 	- Skip running this code if you've already created data. Instead just load the database by entering: `use sqlbook_data;`
 
 ## Key lessons from SQL Cookbook
-
-From the perspective of someone with nonzero but minimal *SQL* experience (in *SAS*)
 
 ### Retrieve records
 1. The order in which the SQL queries are evaluated (p. 4): `FROM` clause ->  `WHERE` -> `SELECT` or `GROUP BY` -> `SELECT`
@@ -562,7 +559,7 @@ order by 2;
 ```sql
 select deptno, ename, hiredate, sal,
 		  sum(sal) over(partition by deptno) as total1,
-	  	sum(sal) over() as total2,
+	      sum(sal) over() as total2,
 		  sum(sal) over(order by hiredate) as running_total
 from emp
 where deptno=10;
@@ -572,13 +569,13 @@ where deptno=10;
 select deptno, ename, hiredate, sal,
 		  sum(sal) over(partition by deptno) as total1,
 		  sum(sal) over() as total2,
-	  	sum(sal) over(order by hiredate
+	      sum(sal) over(order by hiredate
 						range between unbounded preceding and current row) as running_total1,
-	  	sum(sal) ove2(order by hiredate
+	      sum(sal) over(order by hiredate
 						rows between 1 preceding and current row) as running_total2,
-	  	sum(sal) over(order by hiredate
+		  sum(sal) over(order by hiredate
 						range between current row and unbounded following) as running_total3,
-	  	sum(sal) over(order by hiredate
+		  sum(sal) over(order by hiredate
 						rows between 1 preceding and 1 following) as running_total4
 from emp
 where deptno=10;

@@ -23,12 +23,21 @@ If still unclear, check out video tutorial [how to install MySQL on Mac](https:/
 
 #### Set up example data from the book on computer:
 1. Turn on the MySQL server on Preference Pane
-2. On Terminal, enter: `cd /usr/local/mysql/bin`
-2. Then enter: `./mysql -u root -p`
+2. On Terminal, enter:
+```
+cd /usr/local/mysql/bin
+```
+2. Then enter:
+```
+./mysql -u root -p
+```
 3. Enter the password you chose
 	- If this is the first time you use MySQL on Mac, check out for more detailed instructions on password video tutorial on [how to start a MySQL](https://www.youtube.com/watch?v=q9S51sykd1A) by rudolfson.junior.
 3. Run code in [crsqlbook_data.txt](https://www.dropbox.com/s/tpar4hdprxekm6h/crsqlbook_data.txt?dl=0) to create database “sqlbook_data” and 4 tables: “emp”, “dept”, “t10”, “t100”
-	- Skip running this code if you've already created data. Instead just load the database by entering: `use sqlbook_data;`
+	- Skip running this code if you've already created data. Instead just load the database by entering:
+	```
+	use sqlbook_data;
+	```
 
 ## Key lessons from SQL Cookbook
 
